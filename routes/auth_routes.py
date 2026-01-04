@@ -1,15 +1,27 @@
-from functools import wraps
-from flask import request, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, session
 
-API_TOKEN = "secret-token-123"
+auth_bp = Blueprint("auth", __name__)
 
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = request.headers.get("Authorization")
+USER = {
+    "username": "admin",
+    "password": "admin123"
+}
 
-        if not token or token != API_TOKEN:
-            return jsonify({"error": "Unauthorized"}), 401
+@auth_bp.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
 
-        return f(*args, **kwargs)
-    return decorated
+        if username == USER["username"] and password == USER["password"]:
+            session["user"] = username
+            return redirect(url_for("frontend.home"))
+
+        return "Invalid credentials", 401
+
+    return render_template("login.html")
+
+@auth_bp.route("/logout")
+def logout():
+    session.pop("user", None)
+    return redirect(url_for("auth.login"))

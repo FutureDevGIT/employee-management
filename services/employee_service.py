@@ -18,7 +18,7 @@ class EmployeeService:
         return query.all()
 
     @staticmethod
-    def create(data):
+    def create_employee(data):
         """
         Create a new employee record.
         """
